@@ -1,7 +1,7 @@
 import { Course } from "../models/course.model.js";
 import { v2 as cloudinary } from "cloudinary";
 import { Purchase } from "../models/purchase.model.js";
-
+// import path from "path"
 export const createCourse = async (req, res) => {
   const adminId = req.adminId;
   const { title, description, price } = req.body;
@@ -55,7 +55,7 @@ export const createCourse = async (req, res) => {
 export const updateCourse = async (req, res) => {
   const adminId = req.adminId;
   const { courseId } = req.params;
-  const { title, description, price, image } = req.body;
+  const { title, description, price } = req.body;
   try {
     const courseSearch = await Course.findById(courseId);
     if (!courseSearch) {
@@ -70,10 +70,10 @@ export const updateCourse = async (req, res) => {
         title,
         description,
         price,
-        image: {
-          public_id: image?.public_id,
-          url: image?.url,
-        },
+        // image: {
+        //   public_id: image?.public_id,
+        //   url: image?.url,
+        // },
       }
     );
     if (!course) {
@@ -84,33 +84,33 @@ export const updateCourse = async (req, res) => {
     res.status(201).json({ message: "Course updated successfully", course });
   } catch (error) {
     res.status(500).json({ errors: "Error in course updating" });
-    console.log("Error in course updating ", error);
+    console.log("Error in course updating", error);
   }
 };
 
 export const deleteCourse = async (req, res) => {
-  const adminId = req.adminId;
   const { courseId } = req.params;
+
   try {
-    const course = await Course.findOneAndDelete({
-      _id: courseId,
-      creatorId: adminId,
-    });
+    const course = await Course.findByIdAndDelete(courseId);
+
     if (!course) {
-      return res
-        .status(404)
-        .json({ errors: "can't delete, created by other admin" });
+      return res.status(404).json({ errors: "Course not found" });
     }
+
     res.status(200).json({ message: "Course deleted successfully" });
   } catch (error) {
+    console.error("Error in course deleting", error);
     res.status(500).json({ errors: "Error in course deleting" });
-    console.log("Error in course deleting", error);
   }
 };
+
 
 export const getCourses = async (req, res) => {
   try {
     const courses = await Course.find({});
+    // console.log(courses, Course);
+    
     res.status(201).json({ courses });
   } catch (error) {
     res.status(500).json({ errors: "Error in getting courses" });
@@ -120,6 +120,7 @@ export const getCourses = async (req, res) => {
 
 export const courseDetails = async (req, res) => {
   const { courseId } = req.params;
+  console.log(courseId)
   try {
     const course = await Course.findById(courseId);
     if (!course) {

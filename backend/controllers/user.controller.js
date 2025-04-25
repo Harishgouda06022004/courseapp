@@ -48,31 +48,31 @@ export const signup = async (req, res) => {
     console.log("Error in signup", error);
   }
 };
-
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email: email });
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    const user = await User.findOne({ email });
 
-    if (!user || !isPasswordCorrect) {
+    if (!user) {
       return res.status(403).json({ errors: "Invalid credentials" });
     }
 
-    // jwt code
-    const token = jwt.sign(
-      {
-        id: user._id,
-      },
-      config.JWT_USER_PASSWORD,
-      { expiresIn: "1d" }
-    );
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+      return res.status(403).json({ errors: "Invalid credentials" });
+    }
+
+    const token = jwt.sign({ id: user._id }, config.JWT_USER_PASSWORD, {
+      expiresIn: "1d",
+    });
+
     const cookieOptions = {
-      expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
-      httpOnly: true, //  can't be accsed via js directly
-      secure: process.env.NODE_ENV === "production", // true for https only
-      sameSite: "Strict", // CSRF attacks
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
     };
+
     res.cookie("jwt", token, cookieOptions);
     res.status(201).json({ message: "Login successful", user, token });
   } catch (error) {

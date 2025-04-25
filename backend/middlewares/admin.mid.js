@@ -16,8 +16,8 @@ function adminMiddleware(req, res, next) {
 
     next();
   } catch (error) {
-    return res.status(401).json({ errors: "Invalid token or expired" });
     console.log("error in user middleware", error);
+    return res.status(401).json({ errors: "Invalid token or expired" });
   }
 }
 

@@ -50,13 +50,20 @@ export const signup = async (req, res) => {
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
+  console.log("admin mail   :",email);
   try {
     const admin = await Admin.findOne({ email: email });
     const isPasswordCorrect = await bcrypt.compare(password, admin.password);
 
+    console.log(admin, isPasswordCorrect);
+    
+
     if (!admin || !isPasswordCorrect) {
       return res.status(403).json({ errors: "Invalid credentials" });
     }
+
+    console.log("adminlogin :", config.JWT_ADMIN_PASSWORD, admin._id);
+    
 
     // jwt code
     const token = jwt.sign(
@@ -72,6 +79,8 @@ export const login = async (req, res) => {
       secure: process.env.NODE_ENV === "production", // true for https only
       sameSite: "Strict", // CSRF attacks
     };
+    console.log(isPasswordCorrect, admin);
+    
     res.cookie("jwt", token, cookieOptions);
     res.status(201).json({ message: "Login successful", admin, token });
   } catch (error) {

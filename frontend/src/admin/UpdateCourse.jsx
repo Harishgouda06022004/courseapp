@@ -79,6 +79,8 @@ function UpdateCourse() {
       toast.error(error.response.data.errors);
     }
   };
+  
+  
 
   if (loading) {
     return <p className="text-center text-gray-500">Loading...</p>;
